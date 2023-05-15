@@ -1,5 +1,16 @@
 package quant
 
 type Quant struct {
-	Text string
+	title string
+	text  string
+}
+
+func New(title string) Quant {
+	return Quant{
+		title: title,
+	}
+}
+
+func Title(q Quant) string {
+	return q.title
 }
