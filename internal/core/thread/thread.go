@@ -15,11 +15,11 @@ type Thread struct {
 // Pre-cond: given title
 //
 // Post-cond: created new instance of Thread
-func New(title string) Thread {
+func New(title string) (Thread, error) {
 	return Thread{
 		title:  title,
 		quants: make(map[string]quant.Quant),
-	}
+	}, nil
 }
 
 // Title returns title of given Thread instance
