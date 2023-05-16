@@ -17,11 +17,9 @@ func TestNewThreadWithCorrectTitle(t *testing.T) {
 
 func TestAddNotExistingQuantsToThread(t *testing.T) {
 	cases := []quant.Quant{
-		quant.New("somebody"),
-		quant.New("once"),
-		quant.New("told"),
-		quant.New("me"),
-		quant.New("..."),
+		quant.New("somebody", "once"),
+		quant.New("told", "me"),
+		quant.New("the", "world"),
 	}
 
 	sut := New("sut")
@@ -38,11 +36,9 @@ func TestAddNotExistingQuantsToThread(t *testing.T) {
 
 func TestAddWithExistingQuantsToThread(t *testing.T) {
 	cases := []quant.Quant{
-		quant.New("somebody"),
-		quant.New("once"),
-		quant.New("told"),
-		quant.New("me"),
-		quant.New("..."),
+		quant.New("somebody", "once"),
+		quant.New("told", "me"),
+		quant.New("the", "world"),
 	}
 
 	sut := New("sut")
