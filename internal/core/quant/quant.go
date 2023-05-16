@@ -1,5 +1,10 @@
 package quant
 
+import (
+	"fmt"
+	"reflection_prototype/internal/core/validator"
+)
+
 type Quant struct {
 	title string
 	text  string
@@ -11,6 +16,9 @@ type Quant struct {
 //
 // Post-cond: created new instance of Quant
 func New(title, text string) (Quant, error) {
+	if !validator.ValidateTitle(title) {
+		return Quant{}, fmt.Errorf("not valid title given")
+	}
 	return Quant{
 		title: title,
 		text:  text,
