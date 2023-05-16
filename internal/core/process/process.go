@@ -3,6 +3,7 @@ package process
 import (
 	"fmt"
 	"reflection_prototype/internal/core/thread"
+	"reflection_prototype/internal/core/validator"
 )
 
 type Process struct {
@@ -16,7 +17,9 @@ type Process struct {
 //
 // Post-cond: created new instance of Process
 func New(title string) (Process, error) {
-	// TODO add regexp validation
+	if !validator.ValidateTitle(title) {
+		return Process{}, fmt.Errorf("not valid title given")
+	}
 	return Process{
 		title:   title,
 		threads: make(map[string]thread.Thread),
