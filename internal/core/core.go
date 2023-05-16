@@ -8,10 +8,10 @@ import (
 
 type Storage interface {
 	StoreProcess(p process.Process) error
-	SelectProcess(p process.Process) error
+	SelectProcess(p process.Process) (process.Process, error)
 
 	StoreThread(t thread.Thread, p process.Process) error
-	SelectThread(t thread.Thread) error
+	SelectThread(t thread.Thread, p process.Process) (thread.Thread, error)
 
 	StoreQuant(q quant.Quant, t thread.Thread) error
 }
@@ -40,19 +40,49 @@ func CreateProcess(title string, s Storage) error {
 // Pre-cond: given process title, thread title and storage.
 // Process must exists and title of thread must be unique
 // Post-cond: thread was created, error returned nil. Otherwise returns err
-func CreateThread(procTitle string, threadTitle string, s Storage) error {
-	proc, err := process.New(procTitle)
+func CreateThread(procTitle, threadTitle string, s Storage) error {
+	proc, _ := process.New(procTitle)
+
+	p, err := s.SelectProcess(proc)
 	if err != nil {
 		return err
 	}
 
-	t := thread.New(threadTitle)
-	p, err := process.Add(t, proc)
+	t, _ := thread.New(threadTitle)
 	if err != nil {
 		return err
 	}
 
 	err = s.StoreThread(t, p)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// CreateQuant creates new quant with given name and stores it to the given Storage
+//
+// Pre-cond: given process title, thread title, quant title and storage.
+// Process and thread must exist in Storage and title of quant must be unique
+// Post-cond: quant was created, error returned nil. Otherwise returns err
+func CreateQuant(procTitle, threadTitle, quantTitle, quantText string, s Storage) error {
+	proc, _ := process.New(procTitle)
+
+	p, err := s.SelectProcess(proc)
+	if err != nil {
+		return err
+	}
+
+	thread, _ := thread.New(threadTitle)
+
+	t, err := s.SelectThread(thread, p)
+	if err != nil {
+		return err
+	}
+
+	q, _ := quant.New(quantTitle, quantText)
+	err = s.StoreQuant(q, t)
 	if err != nil {
 		return err
 	}
