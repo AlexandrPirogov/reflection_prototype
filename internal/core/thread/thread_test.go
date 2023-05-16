@@ -10,7 +10,7 @@ import (
 func TestNewThreadWithCorrectTitle(t *testing.T) {
 	title := "some_title"
 
-	sut := New(title)
+	sut, _ := New(title)
 
 	assert.Equal(t, Title(sut), title)
 }
@@ -22,7 +22,7 @@ func TestAddNotExistingQuantsToThread(t *testing.T) {
 		quant.New("the", "world"),
 	}
 
-	sut := New("sut")
+	sut, _ := New("sut")
 	var err error
 
 	for _, q := range cases {
@@ -41,7 +41,7 @@ func TestAddWithExistingQuantsToThread(t *testing.T) {
 		quant.New("the", "world"),
 	}
 
-	sut := New("sut")
+	sut, _ := New("sut")
 	var err error
 
 	for _, q := range cases {
