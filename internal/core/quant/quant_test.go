@@ -8,8 +8,8 @@ import (
 
 func TestNewQuantWithCorrectTitle(t *testing.T) {
 	title := "title"
-
-	sut := New(title)
+	text := "text"
+	sut := New(title, text)
 
 	assert.Equal(t, Title(sut), title)
 }

@@ -10,9 +10,10 @@ type Quant struct {
 // Pre-cond: given title
 //
 // Post-cond: created new instance of Quant
-func New(title string) Quant {
+func New(title, text string) Quant {
 	return Quant{
 		title: title,
+		text:  text,
 	}
 }
 
