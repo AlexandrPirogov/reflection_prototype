@@ -9,7 +9,7 @@ import (
 func TestCreateProcessWithCorrectTitle(t *testing.T) {
 	title := "some_title"
 
-	sut := New(title)
+	sut, _ := New(title)
 
 	assert.Equal(t, title, sut.title)
 }
