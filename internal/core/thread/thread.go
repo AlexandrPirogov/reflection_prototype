@@ -62,3 +62,12 @@ func Seek(q quant.Quant, t Thread) (quant.Quant, bool) {
 
 	return quant.Quant{}, false
 }
+
+// Len returns count of stored quants
+//
+// Pre-cond: given thread
+//
+// Post-cond: returned count of stored quants
+func Len(t Thread) int {
+	return len(t.quants)
+}
