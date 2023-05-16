@@ -3,6 +3,7 @@ package thread
 import (
 	"fmt"
 	"reflection_prototype/internal/core/quant"
+	"reflection_prototype/internal/core/validator"
 )
 
 type Thread struct {
@@ -16,6 +17,9 @@ type Thread struct {
 //
 // Post-cond: created new instance of Thread
 func New(title string) (Thread, error) {
+	if !validator.ValidateTitle(title) {
+		return Thread{}, fmt.Errorf("not valid title given")
+	}
 	return Thread{
 		title:  title,
 		quants: make(map[string]quant.Quant),
