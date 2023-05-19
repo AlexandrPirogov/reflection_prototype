@@ -1,4 +1,19 @@
 package main
 
+import (
+	"log"
+	"reflection_prototype/internal/api"
+	"reflection_prototype/internal/server"
+	storage "reflection_prototype/internal/storage/postgres"
+)
+
 func main() {
+	h := api.Handler{
+		&storage.PgConnection{},
+	}
+	s := server.New(&h)
+	err := s.ListenAndServe()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
