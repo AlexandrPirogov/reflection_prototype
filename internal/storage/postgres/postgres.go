@@ -31,6 +31,33 @@ func (pg *PgConnection) StoreProcess(p process.Process) error {
 	return nil
 }
 
+func (pg *PgConnection) ReadProcesses(pattern process.Process) ([]process.Process, error) {
+	tmpUrl := env.ReadPgUrl()
+	conn, err := pgx.Connect(context.Background(), tmpUrl)
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close(context.Background())
+
+	result := make([]process.Process, 0)
+	rows, err := conn.Query(context.Background(), "select title from processes where title = $1", process.Title(pattern))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		var process process.Process
+		err := rows.Scan(&process.Title)
+		if err != nil {
+			log.Println(err)
+			return nil, err
+		}
+		result = append(result, process)
+	}
+	return result, nil
+}
+
 func (pg *PgConnection) SelectProcess(p process.Process) (process.Process, error) {
 	return p, nil
 }
