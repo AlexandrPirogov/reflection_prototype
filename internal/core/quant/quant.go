@@ -2,7 +2,7 @@ package quant
 
 import (
 	"fmt"
-	"reflection_prototype/internal/core/validator"
+	"reflection_prototype/internal/validator"
 )
 
 type Quant struct {

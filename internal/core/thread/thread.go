@@ -3,7 +3,7 @@ package thread
 import (
 	"fmt"
 	"reflection_prototype/internal/core/quant"
-	"reflection_prototype/internal/core/validator"
+	"reflection_prototype/internal/validator"
 )
 
 type Thread struct {
