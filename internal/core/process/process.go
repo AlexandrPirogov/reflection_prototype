@@ -3,36 +3,36 @@ package process
 import (
 	"fmt"
 	"reflection_prototype/internal/core/thread"
-	"reflection_prototype/internal/core/validator"
+	"reflection_prototype/internal/validator"
 )
 
 type Process struct {
-	title   string
+	Title   string `json:"Title"`
 	threads map[string]thread.Thread
 }
 
 // New creates new instance of Process with given name
 //
-// Pre-cond: given title
+// Pre-cond: given Title
 //
 // Post-cond: created new instance of Process
-func New(title string) (Process, error) {
-	if !validator.ValidateTitle(title) {
-		return Process{}, fmt.Errorf("not valid title given")
+func New(Title string) (Process, error) {
+	if !validator.ValidateTitle(Title) {
+		return Process{}, fmt.Errorf("not valid Title given")
 	}
 	return Process{
-		title:   title,
+		Title:   Title,
 		threads: make(map[string]thread.Thread),
 	}, nil
 }
 
-// Title returns title of given Process instance
+// Title returns Title of given Process instance
 //
 // Pre-cond: given instance of Process
 //
-// Post-cond: return title of Process
+// Post-cond: return Title of Process
 func Title(p Process) string {
-	return p.title
+	return p.Title
 }
 
 // Seek seeks for given thread in given process

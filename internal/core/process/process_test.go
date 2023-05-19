@@ -11,5 +11,5 @@ func TestCreateProcessWithCorrectTitle(t *testing.T) {
 
 	sut, _ := New(title)
 
-	assert.Equal(t, title, sut.title)
+	assert.Equal(t, title, sut.Title)
 }
