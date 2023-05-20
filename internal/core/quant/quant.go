@@ -3,33 +3,37 @@ package quant
 import (
 	"fmt"
 	"reflection_prototype/internal/validator"
+	"time"
 )
 
 type Quant struct {
-	title string
-	text  string
+	Process   string    `json:"process"`
+	Thread    string    `json:"thread"`
+	Title     string    `json:"title"`
+	Text      string    `json:"text"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 // New creates new instance of Quant with given name
 //
-// Pre-cond: given title
+// Pre-cond: given Title
 //
 // Post-cond: created new instance of Quant
-func New(title, text string) (Quant, error) {
-	if !validator.ValidateTitle(title) {
-		return Quant{}, fmt.Errorf("not valid title given")
+func New(Title, Text string) (Quant, error) {
+	if !validator.ValidateTitle(Title) {
+		return Quant{}, fmt.Errorf("not valid Title given")
 	}
 	return Quant{
-		title: title,
-		text:  text,
+		Title: Title,
+		Text:  Text,
 	}, nil
 }
 
-// Title returns title of given Quant instance
+// Title returns Title of given Quant instance
 //
 // Pre-cond: given instance of Thread
 //
-// Post-cond: return title of Quant
+// Post-cond: return Title of Quant
 func Title(q Quant) string {
-	return q.title
+	return q.Title
 }
