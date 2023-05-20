@@ -48,7 +48,7 @@ func CreateThread(procTitle, threadTitle string, s Storage) error {
 		return err
 	}
 
-	t, _ := thread.New(threadTitle)
+	t, _ := thread.New(procTitle, threadTitle)
 	if err != nil {
 		return err
 	}
@@ -74,7 +74,7 @@ func CreateQuant(procTitle, threadTitle, quantTitle, quantText string, s Storage
 		return err
 	}
 
-	thread, _ := thread.New(threadTitle)
+	thread, _ := thread.New(procTitle, threadTitle)
 
 	t, err := s.SelectThread(thread, p)
 	if err != nil {
