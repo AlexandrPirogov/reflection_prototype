@@ -4,35 +4,39 @@ import (
 	"fmt"
 	"reflection_prototype/internal/core/quant"
 	"reflection_prototype/internal/validator"
+	"time"
 )
 
 type Thread struct {
-	title  string
-	quants map[string]quant.Quant
+	Process   string    `json:"process"`
+	Title     string    `json:"title"`
+	CreatedAt time.Time `json:"created_at"`
+	quants    map[string]quant.Quant
 }
 
 // New creates new instance of thread with given name
 //
-// Pre-cond: given title
+// Pre-cond: given Title
 //
 // Post-cond: created new instance of Thread
-func New(title string) (Thread, error) {
-	if !validator.ValidateTitle(title) {
-		return Thread{}, fmt.Errorf("not valid title given")
+func New(Process string, Title string) (Thread, error) {
+	if !validator.ValidateTitle(Title) {
+		return Thread{}, fmt.Errorf("not valid Title given")
 	}
 	return Thread{
-		title:  title,
-		quants: make(map[string]quant.Quant),
+		Process: Process,
+		Title:   Title,
+		quants:  make(map[string]quant.Quant),
 	}, nil
 }
 
-// Title returns title of given Thread instance
+// Title returns Title of given Thread instance
 //
 // Pre-cond: given instance of Thread
 //
-// Post-cond: return title of Thread
+// Post-cond: return Title of Thread
 func Title(t Thread) string {
-	return t.title
+	return t.Title
 }
 
 // Add adds new Quant to Thread
