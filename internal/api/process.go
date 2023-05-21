@@ -52,7 +52,7 @@ func (h *Handler) ReadProcesses(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	processes, err := h.S.ReadProcesses(proc)
+	processes, err := h.S.ReadProcess(proc)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusBadRequest)

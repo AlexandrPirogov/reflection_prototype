@@ -52,7 +52,7 @@ func (h *Handler) ReadQuants(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	quants, err := h.S.ReadQuants(q)
+	quants, err := h.S.ReadQuant(q)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusBadRequest)

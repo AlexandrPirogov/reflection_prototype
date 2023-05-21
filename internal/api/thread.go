@@ -52,7 +52,7 @@ func (h *Handler) ReadThreads(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	threads, err := h.S.ReadThreads(t)
+	threads, err := h.S.ReadThread(t)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
