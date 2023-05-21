@@ -21,6 +21,11 @@ func (pg *pgConnection) StoreQuant(q quant.Quant) error {
 		log.Println(err)
 		return err
 	}
+
+	if err = pg.contributeQantCreation(); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -29,7 +34,7 @@ func (pg *pgConnection) StoreQuant(q quant.Quant) error {
 // Pre-cond: given pattern quant
 //
 // Post-cond: returned list of quants that satisfied pattern
-func (pg *pgConnection) ReadQuants(q quant.Quant) ([]quant.Quant, error) {
+func (pg *pgConnection) ReadQuant(q quant.Quant) ([]quant.Quant, error) {
 	query := `select title, created_at from quants
 	where title = $1 
 	and thread_id = (select id from threads where title = $2

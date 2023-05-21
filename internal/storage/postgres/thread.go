@@ -20,6 +20,10 @@ func (pg *pgConnection) StoreThread(t thread.Thread) error {
 		log.Println(err)
 		return err
 	}
+
+	if err = pg.contributeThreadCreation(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -28,7 +32,7 @@ func (pg *pgConnection) StoreThread(t thread.Thread) error {
 // Pre-cond: given pattern thread
 //
 // Post-cond: returned list of threads that satisfied pattern
-func (pg *pgConnection) ReadThreads(t thread.Thread) ([]thread.Thread, error) {
+func (pg *pgConnection) ReadThread(t thread.Thread) ([]thread.Thread, error) {
 	query := `select title, created_at from threads
 	where title = $1 and proc_id = (select id from processes where title = $2)`
 

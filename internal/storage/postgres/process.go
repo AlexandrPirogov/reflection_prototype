@@ -18,6 +18,10 @@ func (pg *pgConnection) StoreProcess(p process.Process) error {
 		log.Println(err)
 		return err
 	}
+
+	if err = pg.contributeProcessCreation(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -26,7 +30,7 @@ func (pg *pgConnection) StoreProcess(p process.Process) error {
 // Pre-cond: given pattern process
 //
 // Post-cond: returned list of processes that satisfied pattern
-func (pg *pgConnection) ReadProcesses(pattern process.Process) ([]process.Process, error) {
+func (pg *pgConnection) ReadProcess(pattern process.Process) ([]process.Process, error) {
 	result := make([]process.Process, 0)
 	rows, err := pg.conn.Query(context.Background(), "select title from processes where title = $1", pattern.Title)
 	if err != nil {
