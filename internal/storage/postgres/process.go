@@ -3,11 +3,8 @@ package storage
 import (
 	"context"
 	"log"
-	"reflection_prototype/internal/config/env"
 	"reflection_prototype/internal/core/process"
 	"time"
-
-	"github.com/jackc/pgx/v5"
 )
 
 // StoreProcess stores given process to db
@@ -15,15 +12,8 @@ import (
 // Pre-cond: given process to store. Process must be unique
 //
 // Post-cond: process was stored in db
-func (pg *PgConnection) StoreProcess(p process.Process) error {
-	tmpUrl := env.ReadPgUrl()
-	conn, err := pgx.Connect(context.Background(), tmpUrl)
-	if err != nil {
-		return err
-	}
-	defer conn.Close(context.Background())
-
-	_, err = conn.Exec(context.Background(), "insert into processes values(default, 1, $1, $2)", process.Title(p), time.Now())
+func (pg *pgConnection) StoreProcess(p process.Process) error {
+	_, err := pg.conn.Exec(context.Background(), "insert into processes values(default, 1, $1, $2)", process.Title(p), time.Now())
 	if err != nil {
 		log.Println(err)
 		return err
@@ -36,16 +26,9 @@ func (pg *PgConnection) StoreProcess(p process.Process) error {
 // Pre-cond: given pattern process
 //
 // Post-cond: returned list of processes that satisfied pattern
-func (pg *PgConnection) ReadProcesses(pattern process.Process) ([]process.Process, error) {
-	tmpUrl := env.ReadPgUrl()
-	conn, err := pgx.Connect(context.Background(), tmpUrl)
-	if err != nil {
-		return nil, err
-	}
-	defer conn.Close(context.Background())
-
+func (pg *pgConnection) ReadProcesses(pattern process.Process) ([]process.Process, error) {
 	result := make([]process.Process, 0)
-	rows, err := conn.Query(context.Background(), "select title from processes where title = $1", pattern.Title)
+	rows, err := pg.conn.Query(context.Background(), "select title from processes where title = $1", pattern.Title)
 	if err != nil {
 		log.Println(err)
 		return nil, err
