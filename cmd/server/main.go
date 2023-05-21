@@ -9,7 +9,7 @@ import (
 
 func main() {
 	h := api.Handler{
-		&storage.PgConnection{},
+		storage.New(),
 	}
 	s := server.New(&h)
 	err := s.ListenAndServe()
