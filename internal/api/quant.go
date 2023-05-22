@@ -2,7 +2,7 @@ package api
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"reflection_prototype/internal/core/quant"
@@ -12,7 +12,7 @@ import (
 
 // Store process route that accepts json representation of Process and stores it to Storage
 func (h *Handler) StoreQuant(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
@@ -39,7 +39,7 @@ func (h *Handler) StoreQuant(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) ListQuants(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
