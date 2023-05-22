@@ -23,6 +23,10 @@ type Handler interface {
 	StoreQuant(w http.ResponseWriter, r *http.Request)
 	ReadQuant(w http.ResponseWriter, r *http.Request)
 	ListQuants(w http.ResponseWriter, r *http.Request)
+
+	StoreSheet(w http.ResponseWriter, r *http.Request)
+	ReadSheet(w http.ResponseWriter, r *http.Request)
+	StoreRow(w http.ResponseWriter, r *http.Request)
 }
 
 func New(h Handler) *http.Server {
@@ -49,6 +53,11 @@ func New(h Handler) *http.Server {
 		r.Post("/quants", h.StoreQuant)
 		r.Get("/processes/{process}/{thread}/{quant}", h.ReadQuant)
 		r.Post("/list/quants", h.ListQuants)
+
+		r.Post("/processes/{process}/sheet", h.StoreSheet)
+		r.Get("/processes/{process}/sheet", h.ReadSheet)
+
+		r.Post("/processes/{process}/sheet/row", h.StoreRow)
 
 	})
 	return &http.Server{
