@@ -2,11 +2,9 @@ package server
 
 import (
 	"net/http"
-	"reflection_prototype/internal/core/auth/jwt"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-chi/jwtauth/v5"
 )
 
 type Handler interface {
@@ -14,13 +12,17 @@ type Handler interface {
 	Register(w http.ResponseWriter, r *http.Request)
 
 	StoreProcess(w http.ResponseWriter, r *http.Request)
-	ReadProcesses(w http.ResponseWriter, r *http.Request)
+	ReadProcess(w http.ResponseWriter, r *http.Request)
+	ListProcesses(w http.ResponseWriter, r *http.Request)
+	ListProcessesThreads(w http.ResponseWriter, r *http.Request)
 
 	StoreThread(w http.ResponseWriter, r *http.Request)
-	ReadThreads(w http.ResponseWriter, r *http.Request)
+	ReadThread(w http.ResponseWriter, r *http.Request)
+	ListThreads(w http.ResponseWriter, r *http.Request)
 
 	StoreQuant(w http.ResponseWriter, r *http.Request)
-	ReadQuants(w http.ResponseWriter, r *http.Request)
+	ReadQuant(w http.ResponseWriter, r *http.Request)
+	ListQuants(w http.ResponseWriter, r *http.Request)
 }
 
 func New(h Handler) *http.Server {
@@ -32,16 +34,21 @@ func New(h Handler) *http.Server {
 	r.Post("/register", h.Register)
 
 	r.Group(func(r chi.Router) {
-		r.Use(jwtauth.Verifier(jwt.TokenAuth))
-		r.Use(jwtauth.Authenticator)
-		r.Post("/list/processes", h.ReadProcesses)
+		//r.Use(jwtauth.Verifier(jwt.TokenAuth))
+		//r.Use(jwtauth.Authenticator)
+
+		r.Post("/list/processes", h.ListProcesses)
+		r.Get("/processes/{process}", h.ReadProcess)
+		r.Get("/process/{process}/threads", h.ListProcessesThreads)
 		r.Post("/processes", h.StoreProcess)
 
-		r.Post("/list/threads", h.ReadThreads)
+		r.Post("/list/threads", h.ListThreads)
+		r.Get("/processes/{process}/{thread}", h.ReadThread)
 		r.Post("/threads", h.StoreThread)
 
 		r.Post("/quants", h.StoreQuant)
-		r.Post("/list/quants", h.ReadQuants)
+		r.Get("/processes/{process}/{thread}/{quant}", h.ReadQuant)
+		r.Post("/list/quants", h.ListQuants)
 
 	})
 	return &http.Server{
