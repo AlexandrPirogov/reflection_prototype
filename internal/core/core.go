@@ -81,7 +81,7 @@ func CreateQuant(procTitle, threadTitle, quantTitle, quantText string, s Storage
 		return err
 	}
 
-	q, _ := quant.New(quantTitle, quantText)
+	q, _ := quant.New(procTitle, threadTitle, quantTitle, quantText)
 	err = s.StoreQuant(q, t)
 	if err != nil {
 		return err

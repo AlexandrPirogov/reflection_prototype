@@ -9,7 +9,7 @@ import (
 func TestNewQuantWithCorrectTitle(t *testing.T) {
 	title := "title"
 	text := "text"
-	sut, _ := New(title, text)
+	sut, _ := New(title, text, title, text)
 
 	assert.Equal(t, Title(sut), title)
 }
@@ -19,7 +19,7 @@ func TestNewQuantWithIncorrectTitle(t *testing.T) {
 
 	for _, v := range cases {
 		t.Run(v, func(t *testing.T) {
-			_, err := New(v, "")
+			_, err := New(v, v, v, "")
 
 			assert.NotNil(t, err)
 		})

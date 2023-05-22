@@ -19,13 +19,15 @@ type Quant struct {
 // Pre-cond: given Title
 //
 // Post-cond: created new instance of Quant
-func New(Title, Text string) (Quant, error) {
+func New(Process, Thread, Title, Text string) (Quant, error) {
 	if !validator.ValidateTitle(Title) {
 		return Quant{}, fmt.Errorf("not valid Title given")
 	}
 	return Quant{
-		Title: Title,
-		Text:  Text,
+		Process: Process,
+		Thread:  Thread,
+		Title:   Title,
+		Text:    Text,
 	}, nil
 }
 
