@@ -29,10 +29,27 @@ func (pg *pgConnection) StoreProcess(p process.Process) error {
 //
 // Pre-cond: given pattern process
 //
-// Post-cond: returned list of processes that satisfied pattern
-func (pg *pgConnection) ReadProcess(pattern process.Process) ([]process.Process, error) {
+// Post-cond: returned  process that satisfied pattern
+func (pg *pgConnection) ReadProcess(pattern process.Process) (process.Process, error) {
+	var res process.Process
+	query := "select title from processes where title = $1"
+	err := pg.conn.QueryRow(context.Background(), query, pattern.Title).Scan(&res.Title)
+	if err != nil {
+		log.Println(err)
+		return process.Process{}, err
+	}
+
+	return res, nil
+}
+
+// ListProcesses select processes
+//
+// Pre-cond:
+//
+// Post-cond: returned  list of processes
+func (pg *pgConnection) ListProcesses() ([]process.Process, error) {
 	result := make([]process.Process, 0)
-	rows, err := pg.conn.Query(context.Background(), "select title from processes where title = $1", pattern.Title)
+	rows, err := pg.conn.Query(context.Background(), "select title from processes")
 	if err != nil {
 		log.Println(err)
 		return nil, err

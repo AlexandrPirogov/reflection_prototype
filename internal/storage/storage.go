@@ -11,12 +11,17 @@ type Storer interface {
 	Login(u user.User) (string, error)
 	Register(u user.User) error
 
-	ReadProcess(p process.Process) ([]process.Process, error)
+	ReadProcess(p process.Process) (process.Process, error)
+	ListProcesses() ([]process.Process, error)
 	StoreProcess(p process.Process) error
 
-	ReadThread(t thread.Thread) ([]thread.Thread, error)
+	ReadThread(t thread.Thread) (thread.Thread, error)
+	ListThreads() ([]thread.Thread, error)
 	StoreThread(t thread.Thread) error
 
-	ReadQuant(q quant.Quant) ([]quant.Quant, error)
+	ReadQuant(q quant.Quant) (quant.Quant, error)
+	ListQuants() ([]quant.Quant, error)
 	StoreQuant(q quant.Quant) error
+
+	ListProcessesThreads(p process.Process) ([]thread.Thread, error)
 }

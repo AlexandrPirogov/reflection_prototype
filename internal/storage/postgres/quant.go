@@ -29,18 +29,17 @@ func (pg *pgConnection) StoreQuant(q quant.Quant) error {
 	return nil
 }
 
-// ReadQuants select quant with given pattern quant
+// ListQuants returns list of quants stored in db
 //
-// Pre-cond: given pattern quant
+// Pre-cond:
 //
-// Post-cond: returned list of quants that satisfied pattern
-func (pg *pgConnection) ReadQuant(q quant.Quant) ([]quant.Quant, error) {
-	query := `select title, created_at from quants
-	where title = $1 
-	and thread_id = (select id from threads where title = $2
-		and proc_id = (select id from processes where title = $3))`
+// Post-cond: returned list of quants
+func (pg *pgConnection) ListQuants() ([]quant.Quant, error) {
+	query := `select p.title, t.title, q.title, q.created_at from quants q
+			join threads t on q.thread_id = t.id
+			join processes p on t.thread_id = p.id`
 
-	rows, err := pg.conn.Query(context.Background(), query, q.Title, q.Thread, q.Process)
+	rows, err := pg.conn.Query(context.Background(), query)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -59,4 +58,25 @@ func (pg *pgConnection) ReadQuant(q quant.Quant) ([]quant.Quant, error) {
 		result = append(result, q)
 	}
 	return result, nil
+}
+
+// ReadQuant return quants that stored in db and satisfied the given pattern
+//
+// Pre-cond: given pattern q Quant
+//
+// Post-cond: returned quant that satisfied given pattern
+func (pg *pgConnection) ReadQuant(q quant.Quant) (quant.Quant, error) {
+	var res quant.Quant
+	query := `select title, created_at from quants
+	where title = $1 
+	and thread_id = (select id from threads where title = $2
+		and proc_id = (select id from processes where title = $3))`
+
+	err := pg.conn.QueryRow(context.Background(), query, q.Title, q.Thread, q.Process).Scan(&res.Title, &res.CreatedAt)
+	if err != nil {
+		log.Println(err)
+		return quant.Quant{}, err
+	}
+
+	return res, nil
 }

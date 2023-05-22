@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"log"
+	"reflection_prototype/internal/core/process"
 	"reflection_prototype/internal/core/thread"
 	"time"
 )
@@ -27,16 +28,16 @@ func (pg *pgConnection) StoreThread(t thread.Thread) error {
 	return nil
 }
 
-// ReadThreads select thread with given pattern thread
+// ListThreads returns threads that stored in storage
 //
-// Pre-cond: given pattern thread
+// Pre-cond:
 //
-// Post-cond: returned list of threads that satisfied pattern
-func (pg *pgConnection) ReadThread(t thread.Thread) ([]thread.Thread, error) {
-	query := `select title, created_at from threads
-	where title = $1 and proc_id = (select id from processes where title = $2)`
+// Post-cond: returned list of threads that stored in storage
+func (pg *pgConnection) ListThreads() ([]thread.Thread, error) {
+	query := `select p.title, t.title, t.created_at from threads t
+				join processes p on p.id = t.proc_id`
 
-	rows, err := pg.conn.Query(context.Background(), query, t.Title, t.Process)
+	rows, err := pg.conn.Query(context.Background(), query)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -47,7 +48,57 @@ func (pg *pgConnection) ReadThread(t thread.Thread) ([]thread.Thread, error) {
 	defer rows.Close()
 	for rows.Next() {
 		var thread thread.Thread
-		err := rows.Scan(&thread.Title, &thread.CreatedAt)
+		err := rows.Scan(&thread.Process, &thread.Title, &thread.CreatedAt)
+		if err != nil {
+			log.Println(err)
+			return nil, err
+		}
+		result = append(result, thread)
+	}
+	return result, nil
+}
+
+// ReadThreads select thread with given pattern thread
+//
+// Pre-cond: given pattern thread
+//
+// Post-cond: returned list of threads that satisfied pattern
+func (pg *pgConnection) ReadThread(t thread.Thread) (thread.Thread, error) {
+
+	var result thread.Thread
+	query := `select title, created_at from threads
+	where title = $1 and proc_id = (select id from processes where title = $2)`
+
+	err := pg.conn.QueryRow(context.Background(), query, t.Title, t.Process).Scan(&result.Title, &result.CreatedAt)
+	if err != nil {
+		log.Println(err)
+		return thread.Thread{}, err
+	}
+
+	return result, nil
+}
+
+// ListProcessesThreads select threads that belong to given process
+//
+// Pre-cond: given pattern process to which threads are belong
+//
+// Post-cond: returned list of threads that belong to given process
+func (pg *pgConnection) ListProcessesThreads(p process.Process) ([]thread.Thread, error) {
+	query := `select p.title, t.title, t.created_at from threads t
+	join processes p on p.id = t.proc_id and p.title = $1`
+
+	rows, err := pg.conn.Query(context.Background(), query, p.Title)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	result := make([]thread.Thread, 0)
+
+	defer rows.Close()
+	for rows.Next() {
+		var thread thread.Thread
+		err := rows.Scan(&thread.Process, &thread.Title, &thread.CreatedAt)
 		if err != nil {
 			log.Println(err)
 			return nil, err
