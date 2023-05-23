@@ -2,9 +2,11 @@ package server
 
 import (
 	"net/http"
+	"reflection_prototype/internal/core/auth/jwt"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/jwtauth/v5"
 )
 
 type Handler interface {
@@ -38,8 +40,8 @@ func New(h Handler) *http.Server {
 	r.Post("/register", h.Register)
 
 	r.Group(func(r chi.Router) {
-		//r.Use(jwtauth.Verifier(jwt.TokenAuth))
-		//r.Use(jwtauth.Authenticator)
+		r.Use(jwtauth.Verifier(jwt.TokenAuth))
+		r.Use(jwtauth.Authenticator)
 
 		r.Post("/list/processes", h.ListProcesses)
 		r.Get("/processes/{process}", h.ReadProcess)
