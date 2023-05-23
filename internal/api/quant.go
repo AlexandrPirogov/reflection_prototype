@@ -5,13 +5,22 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"reflection_prototype/internal/core/auth/jwt"
 	"reflection_prototype/internal/core/quant"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/jwtauth/v5"
 )
 
 // Store process route that accepts json representation of Process and stores it to Storage
 func (h *Handler) StoreQuant(w http.ResponseWriter, r *http.Request) {
+	usr, err := jwt.UserFromToken(jwtauth.TokenFromHeader(r))
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(401)
+		return
+	}
+
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		log.Println(err)
@@ -27,7 +36,7 @@ func (h *Handler) StoreQuant(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.S.StoreQuant(q)
+	err = h.S.StoreQuant(usr, q)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
@@ -39,6 +48,13 @@ func (h *Handler) StoreQuant(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) ListQuants(w http.ResponseWriter, r *http.Request) {
+	usr, err := jwt.UserFromToken(jwtauth.TokenFromHeader(r))
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(401)
+		return
+	}
+
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		log.Println(err)
@@ -54,7 +70,7 @@ func (h *Handler) ListQuants(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	quants, err := h.S.ListQuants()
+	quants, err := h.S.ListQuants(usr)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
@@ -72,6 +88,13 @@ func (h *Handler) ListQuants(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) ReadQuant(w http.ResponseWriter, r *http.Request) {
+	usr, err := jwt.UserFromToken(jwtauth.TokenFromHeader(r))
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(401)
+		return
+	}
+
 	procTitle := chi.URLParam(r, "process")
 	threadTitle := chi.URLParam(r, "thread")
 	quantTitle := chi.URLParam(r, "quant")
@@ -83,7 +106,7 @@ func (h *Handler) ReadQuant(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := h.S.ReadQuant(quant)
+	res, err := h.S.ReadQuant(usr, quant)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusBadRequest)

@@ -5,13 +5,22 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"reflection_prototype/internal/core/auth/jwt"
 	"reflection_prototype/internal/core/thread"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/jwtauth/v5"
 )
 
 // Store process route that accepts json representation of Process and stores it to Storage
 func (h *Handler) StoreThread(w http.ResponseWriter, r *http.Request) {
+	usr, err := jwt.UserFromToken(jwtauth.TokenFromHeader(r))
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(401)
+		return
+	}
+
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		log.Println(err)
@@ -27,7 +36,7 @@ func (h *Handler) StoreThread(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.S.StoreThread(t)
+	err = h.S.StoreThread(usr, t)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
@@ -39,6 +48,13 @@ func (h *Handler) StoreThread(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) ListThreads(w http.ResponseWriter, r *http.Request) {
+	usr, err := jwt.UserFromToken(jwtauth.TokenFromHeader(r))
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(401)
+		return
+	}
+
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		log.Println(err)
@@ -54,7 +70,7 @@ func (h *Handler) ListThreads(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	threads, err := h.S.ListThreads()
+	threads, err := h.S.ListThreads(usr)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
@@ -72,6 +88,13 @@ func (h *Handler) ListThreads(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) ReadThread(w http.ResponseWriter, r *http.Request) {
+	usr, err := jwt.UserFromToken(jwtauth.TokenFromHeader(r))
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(401)
+		return
+	}
+
 	procTitle := chi.URLParam(r, "process")
 	threadTitle := chi.URLParam(r, "thread")
 	thread, err := thread.New(procTitle, threadTitle)
@@ -81,7 +104,7 @@ func (h *Handler) ReadThread(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := h.S.ReadThread(thread)
+	res, err := h.S.ReadThread(usr, thread)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
