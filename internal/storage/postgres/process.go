@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"log"
+	"reflection_prototype/internal/core/auth/user"
 	"reflection_prototype/internal/core/process"
 	"time"
 )
@@ -12,8 +13,10 @@ import (
 // Pre-cond: given process to store. Process must be unique
 //
 // Post-cond: process was stored in db
-func (pg *pgConnection) StoreProcess(p process.Process) error {
-	_, err := pg.conn.Exec(context.Background(), "insert into processes values(default, 1, $1, $2)", process.Title(p), time.Now())
+func (pg *pgConnection) StoreProcess(u user.User, p process.Process) error {
+	query := `insert into processes values(default, 
+		(select id from users where email = $1), $2, $3)`
+	_, err := pg.conn.Exec(context.Background(), query, u.Email, process.Title(p), time.Now())
 	if err != nil {
 		log.Println(err)
 		return err
@@ -30,10 +33,11 @@ func (pg *pgConnection) StoreProcess(p process.Process) error {
 // Pre-cond: given pattern process
 //
 // Post-cond: returned  process that satisfied pattern
-func (pg *pgConnection) ReadProcess(pattern process.Process) (process.Process, error) {
+func (pg *pgConnection) ReadProcess(u user.User, pattern process.Process) (process.Process, error) {
 	var res process.Process
-	query := "select title from processes where title = $1"
-	err := pg.conn.QueryRow(context.Background(), query, pattern.Title).Scan(&res.Title)
+	query := `select title from processes p
+			join users u on u.id = p.user_id and u.email = $1 and p.title = $2`
+	err := pg.conn.QueryRow(context.Background(), query, u.Email, pattern.Title).Scan(&res.Title)
 	if err != nil {
 		log.Println(err)
 		return process.Process{}, err
@@ -47,9 +51,11 @@ func (pg *pgConnection) ReadProcess(pattern process.Process) (process.Process, e
 // Pre-cond:
 //
 // Post-cond: returned  list of processes
-func (pg *pgConnection) ListProcesses() ([]process.Process, error) {
+func (pg *pgConnection) ListProcesses(u user.User) ([]process.Process, error) {
 	result := make([]process.Process, 0)
-	rows, err := pg.conn.Query(context.Background(), "select title from processes")
+	query := `select title from processes p
+				join users u on u.id = p.user_id and u.email = $1`
+	rows, err := pg.conn.Query(context.Background(), query, u.Email)
 	if err != nil {
 		log.Println(err)
 		return nil, err

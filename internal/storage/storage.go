@@ -12,21 +12,21 @@ type Storer interface {
 	Login(u user.User) (string, error)
 	Register(u user.User) error
 
-	ReadProcess(p process.Process) (process.Process, error)
-	ListProcesses() ([]process.Process, error)
-	StoreProcess(p process.Process) error
+	ReadProcess(u user.User, p process.Process) (process.Process, error)
+	ListProcesses(u user.User) ([]process.Process, error)
+	StoreProcess(u user.User, p process.Process) error
 
-	ReadThread(t thread.Thread) (thread.Thread, error)
-	ListThreads() ([]thread.Thread, error)
-	StoreThread(t thread.Thread) error
+	ReadThread(u user.User, t thread.Thread) (thread.Thread, error)
+	ListThreads(u user.User) ([]thread.Thread, error)
+	StoreThread(u user.User, t thread.Thread) error
 
-	ReadQuant(q quant.Quant) (quant.Quant, error)
-	ListQuants() ([]quant.Quant, error)
-	StoreQuant(q quant.Quant) error
+	ReadQuant(u user.User, q quant.Quant) (quant.Quant, error)
+	ListQuants(u user.User) ([]quant.Quant, error)
+	StoreQuant(u user.User, q quant.Quant) error
 
-	ListProcessesThreads(p process.Process) ([]thread.Thread, error)
+	ListProcessesThreads(u user.User, p process.Process) ([]thread.Thread, error)
 
-	StoreSheet(s sheet.Sheet, p process.Process) error
-	ReadSheet(process.Process) (sheet.Sheet, error)
-	AddRow(r sheet.SheetRow, s sheet.Sheet) error
+	StoreSheet(u user.User, s sheet.Sheet, p process.Process) error
+	ReadSheet(u user.User, p process.Process) (sheet.Sheet, error)
+	AddRow(u user.User, r sheet.SheetRow, s sheet.Sheet) error
 }
