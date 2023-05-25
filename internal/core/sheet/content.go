@@ -1,7 +1,7 @@
 package sheet
 
 type sheetContent struct {
-	Content []SheetRow
+	Content []SheetRow `json:"Content"`
 }
 
 // newContent creates new Instance of sheetContent

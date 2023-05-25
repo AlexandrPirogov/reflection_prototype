@@ -3,9 +3,9 @@ package sheet
 import "time"
 
 type SheetRow struct {
-	Theme string
-	Date  time.Time
-	Done  bool
+	Theme string    `json:"Theme"`
+	Date  time.Time `json:"Date"`
+	Done  bool      `json:"Done"`
 }
 
 // NewSheetRow creates instance of SheetRow
