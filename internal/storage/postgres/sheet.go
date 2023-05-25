@@ -21,7 +21,6 @@ func (pg *pgConnection) StoreSheet(u user.User, s sheet.Sheet, p process.Process
 	return nil
 }
 
-// TODO add content scan
 func (pg *pgConnection) ReadSheet(u user.User, p process.Process) (sheet.Sheet, error) {
 	var res sheet.Sheet
 	query := `select p.title, s.title from sheets s
@@ -51,7 +50,7 @@ func (pg *pgConnection) ReadSheet(u user.User, p process.Process) (sheet.Sheet, 
 	for rows.Next() {
 		var row sheet.SheetRow
 		err = rows.Scan(&row.Theme, &row.Date, &row.Done)
-		
+
 		if err != nil {
 			continue
 		}
@@ -60,14 +59,33 @@ func (pg *pgConnection) ReadSheet(u user.User, p process.Process) (sheet.Sheet, 
 	return res, nil
 }
 
-func (pg *pgConnection) AddRow(u user.User, r sheet.SheetRow, s sheet.Sheet) error {
+func (pg *pgConnection) AddRow(u user.User, r sheet.SheetRow, p process.Process) error {
 	query := `insert into sheets_content values (default,
 		(select id from sheets where proc_id = 
 			(select p.id from processes p
 				join users u on u.id = p.user_id and  p.title = $1 and u.email = $2)),
 			$3, $4, $5)`
 
-	_, err := pg.conn.Exec(context.Background(), query, s.Process, u.Email, r.Theme, r.Date, false)
+	_, err := pg.conn.Exec(context.Background(), query, p.Title, u.Email, r.Theme, r.Date, false)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	return nil
+}
+
+func (pg *pgConnection) MarkRow(u user.User, r sheet.SheetRow, p process.Process) error {
+	query := `update sheets_content sc
+	set done = true
+	where sc.id = (select sc.id from sheets_content sc
+		join sheets s on s.id = sc.sheets_id
+		join processes p on p.id = s.proc_id and p.title = $1
+		join users u on u.id = p.user_id and u.email = $2
+		where sc.Theme = $3)
+	`
+
+	_, err := pg.conn.Exec(context.Background(), query, p.Title, u.Email, r.Theme)
 	if err != nil {
 		log.Println(err)
 		return err

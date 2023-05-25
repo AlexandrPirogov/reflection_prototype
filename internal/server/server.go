@@ -29,6 +29,7 @@ type Handler interface {
 	StoreSheet(w http.ResponseWriter, r *http.Request)
 	ReadSheet(w http.ResponseWriter, r *http.Request)
 	StoreRow(w http.ResponseWriter, r *http.Request)
+	MarkRow(w http.ResponseWriter, r *http.Request)
 }
 
 func New(h Handler) *http.Server {
@@ -60,6 +61,7 @@ func New(h Handler) *http.Server {
 		r.Get("/processes/{process}/sheet", h.ReadSheet)
 
 		r.Post("/processes/{process}/sheet/row", h.StoreRow)
+		r.Post("/processes/{process}/sheet/row/mark", h.MarkRow)
 
 	})
 	return &http.Server{
