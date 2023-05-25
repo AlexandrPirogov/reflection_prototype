@@ -91,7 +91,7 @@ func (pg *pgConnection) ReadThread(u user.User, t thread.Thread) (thread.Thread,
 func (pg *pgConnection) ListProcessesThreads(u user.User, p process.Process) ([]thread.Thread, error) {
 	query := `select p.title, t.title, t.created_at from threads t
 	join processes p on p.id = t.proc_id and p.title = $1
-	join users u u.id = p.user_id and u.email = $2`
+	join users u on u.id = p.user_id and u.email = $2`
 
 	rows, err := pg.conn.Query(context.Background(), query, p.Title, u.Email)
 	if err != nil {

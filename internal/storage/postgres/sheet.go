@@ -26,7 +26,8 @@ func (pg *pgConnection) ReadSheet(u user.User, p process.Process) (sheet.Sheet, 
 	var res sheet.Sheet
 	query := `select p.title, s.title from sheets s
 				join processes p on s.proc_id = p.id and p.title = $1
-				join users u on u.id = p.user_id and u.email = $2`
+				join users u on u.id = p.user_id and u.email = $2
+				join sheets_content sc on s.id = sc.sheets_id`
 
 	err := pg.conn.QueryRow(context.Background(), query, p.Title, u.Email).Scan(&res.Process, &res.Title)
 	if err != nil {
@@ -34,15 +35,37 @@ func (pg *pgConnection) ReadSheet(u user.User, p process.Process) (sheet.Sheet, 
 		return sheet.Sheet{}, err
 	}
 
+	contentQ := `select theme, date, done from sheets_content sc
+	join sheets s on s.id = sc.sheets_id
+	join processes p on s.proc_id = p.id and p.title = $1
+	join users u on u.id = p.user_id and u.email = $2`
+	rows, err := pg.conn.Query(context.Background(), contentQ, p.Title, u.Email)
+
+	if err != nil {
+		log.Println(err)
+		return sheet.Sheet{}, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var row sheet.SheetRow
+		err = rows.Scan(&row.Theme, &row.Date, &row.Done)
+		
+		if err != nil {
+			continue
+		}
+		res = sheet.Add(row, res)
+	}
 	return res, nil
 }
 
 func (pg *pgConnection) AddRow(u user.User, r sheet.SheetRow, s sheet.Sheet) error {
 	query := `insert into sheets_content values (default,
-		(select distinct id from sheets where proc_id = 
-			(select id from processes p
-				join user u on u.id = p.user_id and  p.title = $1 and u.email = $2)),
-			$3, $4, $5, null)`
+		(select id from sheets where proc_id = 
+			(select p.id from processes p
+				join users u on u.id = p.user_id and  p.title = $1 and u.email = $2)),
+			$3, $4, $5)`
 
 	_, err := pg.conn.Exec(context.Background(), query, s.Process, u.Email, r.Theme, r.Date, false)
 	if err != nil {
