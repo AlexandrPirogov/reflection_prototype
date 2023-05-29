@@ -31,7 +31,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	cookie := http.Cookie{
-		Name:  "access_token",
+		Name:  "jwt",
 		Path:  "/",
 		Value: jwt,
 	}
@@ -60,7 +60,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	err = h.S.Register(u)
 	if err != nil {
 		log.Println(err)
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
