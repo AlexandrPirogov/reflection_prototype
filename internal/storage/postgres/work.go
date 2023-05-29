@@ -16,7 +16,7 @@ func (pg *pgConnection) StartWork(u user.User, r sheet.SheetRow, p process.Proce
 			join processes p on p.id = s.proc_id and p.title = $2
 			join users u on u.id = p.user_id and u.email = $1
 			where sc.theme = $3), 
-			now(), null)`
+			now(), now())`
 
 	_, err := pg.conn.Exec(context.Background(), query, u.Email, p.Title, r.Theme)
 	if err != nil {
@@ -35,7 +35,8 @@ func (pg *pgConnection) StopWork(u user.User, r sheet.SheetRow, p process.Proces
 			join sheets s on s.id = sc.sheets_id
 			join processes p on p.id = s.proc_id and p.title = $2
 			join users u on u.id = p.user_id and u.email = $1
-			where sc.theme = $3)`
+			where sc.theme = $3)
+		and dt_start = dt_end`
 
 	_, err := pg.conn.Exec(context.Background(), query, u.Email, p.Title, r.Theme)
 	if err != nil {
