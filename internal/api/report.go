@@ -9,7 +9,6 @@ import (
 	"reflection_prototype/internal/core/process"
 	"reflection_prototype/internal/core/report"
 	"reflection_prototype/internal/core/sheet"
-	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/jwtauth/v5"
@@ -62,11 +61,23 @@ func (h *Handler) FillReport(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sheetRowTitle := chi.URLParam(r, "sheet-row")
-	sheetRow := sheet.NewSheetRow(sheetRowTitle, time.Now())
-
 	reportTitle := chi.URLParam(r, "report")
 	rep := report.New(reportTitle)
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	var sheetRow sheet.SheetRow
+	err = json.Unmarshal(body, &sheetRow)
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
 	err = h.S.FillReport(usr, sheetRow, process, rep)
 	if err != nil {
