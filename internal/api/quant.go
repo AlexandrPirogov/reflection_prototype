@@ -55,21 +55,6 @@ func (h *Handler) ListQuants(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	var q quant.Quant
-	err = json.Unmarshal(body, &q)
-	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
 	quants, err := h.S.ListQuants(usr)
 	if err != nil {
 		log.Println(err)
@@ -77,7 +62,7 @@ func (h *Handler) ListQuants(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	body, err = json.Marshal(quants)
+	body, err := json.Marshal(quants)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
