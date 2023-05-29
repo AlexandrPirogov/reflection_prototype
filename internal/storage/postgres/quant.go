@@ -15,8 +15,8 @@ import (
 // Post-cond: quant was stored in db
 func (pg *pgConnection) StoreQuant(u user.User, q quant.Quant) error {
 	query := `insert into quants values(default,
-		(select id from threads where title = $1
-		and proc_id = (select id from processes p 
+		(select threads.id from threads where title = $1
+		and proc_id = (select p.id from processes p 
 			join users u on u.id = p.user_id where title = $2 and u.email = $3)), $4, $5, $6)`
 	_, err := pg.conn.Exec(context.Background(), query, q.Thread, q.Process, u.Email, q.Title, q.Text, time.Now())
 	if err != nil {
@@ -37,9 +37,9 @@ func (pg *pgConnection) StoreQuant(u user.User, q quant.Quant) error {
 //
 // Post-cond: returned list of quants
 func (pg *pgConnection) ListQuants(u user.User) ([]quant.Quant, error) {
-	query := `select p.title, t.title, q.title, q.created_at from quants q
+	query := `select p.title, t.title, q.title, q.text, q.created_at from quants q
 			join threads t on q.thread_id = t.id
-			join processes p on t.thread_id = p.id
+			join processes p on t.proc_id = p.id
 			join users u on u.id = p.user_id and u.email = $1`
 
 	rows, err := pg.conn.Query(context.Background(), query, u.Email)
@@ -53,7 +53,7 @@ func (pg *pgConnection) ListQuants(u user.User) ([]quant.Quant, error) {
 	defer rows.Close()
 	for rows.Next() {
 		var q quant.Quant
-		err := rows.Scan(&q.Title, &q.CreatedAt)
+		err := rows.Scan(&q.Process, &q.Thread, &q.Title, &q.Text, &q.CreatedAt)
 		if err != nil {
 			log.Println(err)
 			return nil, err
