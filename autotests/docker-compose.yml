@@ -1,0 +1,13 @@
+version: '3.0'
+
+services:
+  db:
+    image: 'postgres:15.2'
+    container_name: 'pg_refl_autotests'
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - "./migration/init.sql:/docker-entrypoint-initdb.d/init.sql"
+    environment:
+      - "POSTGRES_PASSWORD=${POSTGRES_PWD}"
+      - "POSTGRES_USER=${POSTGRES_USER}"
