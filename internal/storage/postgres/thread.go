@@ -71,7 +71,7 @@ func (pg *pgConnection) ReadThread(u user.User, t thread.Thread) (thread.Thread,
 	var result thread.Thread
 	query := `select title, created_at from threads
 	where title = $1 and proc_id = 
-	(select id from processes p 
+	(select p.id from processes p 
 		join users u on u.id = p.user_id and title = $2 and u.email = $3)`
 
 	err := pg.conn.QueryRow(context.Background(), query, t.Title, t.Process, u.Email).Scan(&result.Title, &result.CreatedAt)
