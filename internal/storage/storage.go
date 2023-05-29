@@ -30,4 +30,7 @@ type Storer interface {
 	ReadSheet(u user.User, p process.Process) (sheet.Sheet, error)
 	AddRow(u user.User, r sheet.SheetRow, p process.Process) error
 	MarkRow(u user.User, r sheet.SheetRow, p process.Process) error
+
+	StartWork(u user.User, r sheet.SheetRow, p process.Process) error
+	StopWork(u user.User, r sheet.SheetRow, p process.Process) error
 }
