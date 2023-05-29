@@ -39,7 +39,7 @@ func (h *Handler) StoreProcess(w http.ResponseWriter, r *http.Request) {
 	err = h.S.StoreProcess(usr, proc)
 	if err != nil {
 		log.Println(err)
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -54,20 +54,6 @@ func (h *Handler) ListProcesses(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(401)
 		return
 	}
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	var proc process.Process
-	err = json.Unmarshal(body, &proc)
-	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
 
 	processes, err := h.S.ListProcesses(usr)
 	if err != nil {
@@ -76,7 +62,7 @@ func (h *Handler) ListProcesses(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	body, err = json.Marshal(processes)
+	body, err := json.Marshal(processes)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
