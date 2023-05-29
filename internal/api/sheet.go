@@ -47,11 +47,11 @@ func (h *Handler) StoreSheet(w http.ResponseWriter, r *http.Request) {
 	err = h.S.StoreSheet(usr, shet, proc)
 	if err != nil {
 		log.Println(err)
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusCreated)
 	w.Write(body)
 }
 
