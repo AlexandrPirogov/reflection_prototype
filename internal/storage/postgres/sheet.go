@@ -34,10 +34,12 @@ func (pg *pgConnection) ReadSheet(u user.User, p process.Process) (sheet.Sheet, 
 		return sheet.Sheet{}, err
 	}
 
-	contentQ := `select theme, date, done from sheets_content sc
+	contentQ := `select theme, date, done, sum(AGE(dt_end, dt_start))::varchar as spent from sheets_content sc
 	join sheets s on s.id = sc.sheets_id
 	join processes p on s.proc_id = p.id and p.title = $1
-	join users u on u.id = p.user_id and u.email = $2`
+	join users u on u.id = p.user_id and u.email = $2
+	join work_sessions ws on ws.sheet_content_id = sc.id
+	group by theme, date, done`
 	rows, err := pg.conn.Query(context.Background(), contentQ, p.Title, u.Email)
 
 	if err != nil {
@@ -49,7 +51,8 @@ func (pg *pgConnection) ReadSheet(u user.User, p process.Process) (sheet.Sheet, 
 
 	for rows.Next() {
 		var row sheet.SheetRow
-		err = rows.Scan(&row.Theme, &row.Date, &row.Done)
+
+		err = rows.Scan(&row.Theme, &row.Date, &row.Done, &row.Spent)
 
 		if err != nil {
 			continue
