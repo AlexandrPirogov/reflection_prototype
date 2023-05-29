@@ -159,3 +159,71 @@ func (h *Handler) MarkRow(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 }
+
+func (h *Handler) StartWork(w http.ResponseWriter, r *http.Request) {
+	usr, err := jwt.UserFromToken(jwtauth.TokenFromHeader(r))
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(401)
+		return
+	}
+
+	procTitle := chi.URLParam(r, "process")
+	proc, _ := process.New(procTitle)
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	var row sheet.SheetRow
+	err = json.Unmarshal(body, &row)
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err = h.S.StartWork(usr, row, proc)
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+}
+
+func (h *Handler) StopWork(w http.ResponseWriter, r *http.Request) {
+	usr, err := jwt.UserFromToken(jwtauth.TokenFromHeader(r))
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(401)
+		return
+	}
+
+	procTitle := chi.URLParam(r, "process")
+	proc, _ := process.New(procTitle)
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	var row sheet.SheetRow
+	err = json.Unmarshal(body, &row)
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err = h.S.StopWork(usr, row, proc)
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+}
