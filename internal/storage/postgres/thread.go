@@ -24,7 +24,7 @@ func (pg *pgConnection) StoreThread(u user.User, t thread.Thread) error {
 		return err
 	}
 
-	if err = pg.contributeThreadCreation(); err != nil {
+	if err = pg.contributeThreadCreation(u); err != nil {
 		return err
 	}
 	return nil

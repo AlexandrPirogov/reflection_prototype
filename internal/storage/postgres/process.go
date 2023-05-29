@@ -22,7 +22,7 @@ func (pg *pgConnection) StoreProcess(u user.User, p process.Process) error {
 		return err
 	}
 
-	if err = pg.contributeProcessCreation(); err != nil {
+	if err = pg.contributeProcessCreation(u); err != nil {
 		return err
 	}
 	return nil

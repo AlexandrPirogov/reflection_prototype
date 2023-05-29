@@ -24,7 +24,7 @@ func (pg *pgConnection) StoreQuant(u user.User, q quant.Quant) error {
 		return err
 	}
 
-	if err = pg.contributeQantCreation(); err != nil {
+	if err = pg.contributeQantCreation(u); err != nil {
 		return err
 	}
 
