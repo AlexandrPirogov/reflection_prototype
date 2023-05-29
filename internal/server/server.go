@@ -3,6 +3,7 @@ package server
 import (
 	"net/http"
 	"reflection_prototype/internal/core/auth/jwt"
+	"reflection_prototype/internal/server/middleware/compress"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -43,6 +44,7 @@ func New(h Handler) *http.Server {
 	r := chi.NewRouter()
 	r.Use(middleware.AllowContentType("application/json"))
 	r.Use(middleware.Logger)
+	r.Use(compress.GZIPer)
 
 	r.Post("/login", h.Login)
 	r.Post("/register", h.Register)
