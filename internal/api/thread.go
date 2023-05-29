@@ -55,21 +55,6 @@ func (h *Handler) ListThreads(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	var t thread.Thread
-	err = json.Unmarshal(body, &t)
-	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
 	threads, err := h.S.ListThreads(usr)
 	if err != nil {
 		log.Println(err)
@@ -77,7 +62,7 @@ func (h *Handler) ListThreads(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	body, err = json.Marshal(threads)
+	body, err := json.Marshal(threads)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
