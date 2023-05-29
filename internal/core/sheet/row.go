@@ -6,6 +6,7 @@ type SheetRow struct {
 	Theme string    `json:"Theme"`
 	Date  time.Time `json:"Date"`
 	Done  bool      `json:"Done"`
+	Spent string    `json:"Spent"`
 }
 
 // NewSheetRow creates instance of SheetRow
