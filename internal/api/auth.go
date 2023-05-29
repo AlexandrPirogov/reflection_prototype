@@ -30,8 +30,15 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	cookie := http.Cookie{
+		Name:  "access_token",
+		Path:  "/",
+		Value: jwt,
+	}
+
+	http.SetCookie(w, &cookie)
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(jwt))
+
 }
 
 func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
