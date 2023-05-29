@@ -4,6 +4,7 @@ import (
 	"reflection_prototype/internal/core/auth/user"
 	"reflection_prototype/internal/core/process"
 	"reflection_prototype/internal/core/quant"
+	"reflection_prototype/internal/core/report"
 	"reflection_prototype/internal/core/sheet"
 	"reflection_prototype/internal/core/thread"
 )
@@ -33,4 +34,9 @@ type Storer interface {
 
 	StartWork(u user.User, r sheet.SheetRow, p process.Process) error
 	StopWork(u user.User, r sheet.SheetRow, p process.Process) error
+
+	CreateReport(u user.User, r report.Report) error
+	FillReport(u user.User, s sheet.SheetRow, p process.Process, r report.Report) error
+	ReadReport(u user.User, r report.Report) (report.Report, error)
+	//EaseReport(u user.User, s sheet.SheetRow, r report.Report) error
 }
