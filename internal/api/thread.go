@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"log"
 	"net/http"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/jwtauth/v5"
+	"github.com/jackc/pgx/v5"
 )
 
 // Store process route that accepts json representation of Process and stores it to Storage
@@ -90,6 +92,12 @@ func (h *Handler) ReadThread(w http.ResponseWriter, r *http.Request) {
 	}
 
 	res, err := h.S.ReadThread(usr, thread)
+	if errors.Is(err, pgx.ErrNoRows) {
+		log.Println(err)
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusBadRequest)

@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"log"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/jwtauth/v5"
+	"github.com/jackc/pgx/v5"
 )
 
 func (h *Handler) CreateReport(w http.ResponseWriter, r *http.Request) {
@@ -100,6 +102,12 @@ func (h *Handler) ViewReport(w http.ResponseWriter, r *http.Request) {
 	rep := report.New(reportTitle)
 
 	res, err := h.S.ReadReport(usr, rep)
+	if errors.Is(err, pgx.ErrNoRows) {
+		log.Println(err)
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
