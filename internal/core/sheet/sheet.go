@@ -5,10 +5,26 @@ relation between sheets and processes is 1-to-1
 */
 package sheet
 
+import "reflection_prototype/internal/core"
+
 type Sheet struct {
 	Process string
 	Title   string
 	Content sheetContent
+}
+
+func (s Sheet) IsEmpty() bool {
+	return s.Content.IsEmpty()
+}
+
+func (e Sheet) SetTitle(Title string) core.Sheeter {
+	e.Title = Title
+	return e
+}
+
+func (e Sheet) SetProcess(Title string) core.Sheeter {
+	e.Process = Title
+	return e
 }
 
 // New creates new instances of Sheet

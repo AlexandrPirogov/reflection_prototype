@@ -11,6 +11,10 @@ type Process struct {
 	threads map[string]thread.Thread
 }
 
+func (p Process) IsEmpty() bool {
+	return p.threads == nil || (len(p.threads) == 0)
+}
+
 // New creates new instance of Process with given name
 //
 // Pre-cond: given Title

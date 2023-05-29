@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"reflection_prototype/internal/core"
 	"reflection_prototype/internal/core/auth/user"
 	"reflection_prototype/internal/core/process"
 	"reflection_prototype/internal/core/quant"
@@ -28,7 +29,7 @@ type Storer interface {
 	ListProcessesThreads(u user.User, p process.Process) ([]thread.Thread, error)
 
 	StoreSheet(u user.User, s sheet.Sheet, p process.Process) error
-	ReadSheet(u user.User, p process.Process) (sheet.Sheet, error)
+	ReadSheet(u user.User, p process.Process) (core.Sheeter, error)
 	AddRow(u user.User, r sheet.SheetRow, p process.Process) error
 	MarkRow(u user.User, r sheet.SheetRow, p process.Process) error
 

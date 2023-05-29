@@ -4,6 +4,10 @@ type sheetContent struct {
 	Content []SheetRow `json:"Content"`
 }
 
+func (s sheetContent) IsEmpty() bool {
+	return s.Content == nil || (len(s.Content) == 0)
+}
+
 // newContent creates new Instance of sheetContent
 func newContent() sheetContent {
 	return sheetContent{

@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"errors"
 	"io"
 	"log"
 	"net/http"
@@ -12,7 +11,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/jwtauth/v5"
-	"github.com/jackc/pgx/v5"
 )
 
 func (h *Handler) StoreSheet(w http.ResponseWriter, r *http.Request) {
@@ -73,18 +71,7 @@ func (h *Handler) ReadSheet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	shet, err := h.S.ReadSheet(usr, proc)
-	if errors.Is(err, pgx.ErrNoRows) {
-		log.Println(err)
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-
-	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
+	shet, _ := h.S.ReadSheet(usr, proc)
 
 	body, err := json.Marshal(shet)
 	if err != nil {

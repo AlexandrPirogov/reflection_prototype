@@ -3,10 +3,22 @@ package storage
 import (
 	"context"
 	"log"
+	"reflection_prototype/internal/core"
 	"reflection_prototype/internal/core/auth/user"
 	"reflection_prototype/internal/core/process"
 	"reflection_prototype/internal/core/sheet"
 )
+
+const QuerySheetByEmailAndTitle = `select p.title, s.title from sheets s
+join processes p on s.proc_id = p.id and p.title = $1
+join users u on u.id = p.user_id and u.email = $2`
+
+const QuerySheetContent = `select theme, date, done, sum(AGE(dt_end, dt_start))::varcharas spent from sheets_content sc
+join sheets s on s.id = sc.sheets_id
+join processes p on s.proc_id = p.id and p.title = $1
+join users u on u.id = p.user_id and u.email = $2
+join work_sessions ws on ws.sheet_content_id = sc.id
+group by theme, date, done`
 
 func (pg *pgConnection) StoreSheet(u user.User, s sheet.Sheet, p process.Process) error {
 	query := `insert into sheets values(default, $1, 
@@ -21,45 +33,28 @@ func (pg *pgConnection) StoreSheet(u user.User, s sheet.Sheet, p process.Process
 	return nil
 }
 
-func (pg *pgConnection) ReadSheet(u user.User, p process.Process) (sheet.Sheet, error) {
-	var res sheet.Sheet
-	query := `select p.title, s.title from sheets s
-				join processes p on s.proc_id = p.id and p.title = $1
-				join users u on u.id = p.user_id and u.email = $2
-				join sheets_content sc on s.id = sc.sheets_id`
+func (pg *pgConnection) ReadSheet(u user.User, p process.Process) (core.Sheeter, error) {
+	log.Printf("Process:%s, Email:%s", p.Title, u.Email)
+	rows, _ := pg.conn.Query(context.Background(), QuerySheetContent, p.Title, u.Email)
 
-	err := pg.conn.QueryRow(context.Background(), query, p.Title, u.Email).Scan(&res.Process, &res.Title)
-	if err != nil {
-		log.Println(err)
-		return sheet.Sheet{}, err
-	}
+	log.Println(rows.CommandTag().RowsAffected())
+	err := rowsErrors[0 > 0]
 
-	contentQ := `select theme, date, done, sum(AGE(dt_end, dt_start))::varchar as spent from sheets_content sc
-	join sheets s on s.id = sc.sheets_id
-	join processes p on s.proc_id = p.id and p.title = $1
-	join users u on u.id = p.user_id and u.email = $2
-	join work_sessions ws on ws.sheet_content_id = sc.id
-	group by theme, date, done`
-	rows, err := pg.conn.Query(context.Background(), contentQ, p.Title, u.Email)
+	fun := pgSheetErrors[err][core.SHEET]
+	res, _ := fun(rows)
+	rows.Close()
 
-	if err != nil {
-		log.Println(err)
-		return sheet.Sheet{}, err
-	}
+	log.Println(res.IsEmpty())
+	var process string
+	var title string
+	err = pg.conn.QueryRow(context.Background(), QuerySheetByEmailAndTitle, p.Title, u.Email).Scan(&process, &title)
+	res = res.SetProcess(process)
 
-	defer rows.Close()
+	log.Println(res.IsEmpty())
+	res = res.SetTitle(title)
 
-	for rows.Next() {
-		var row sheet.SheetRow
-
-		err = rows.Scan(&row.Theme, &row.Date, &row.Done, &row.Spent)
-
-		if err != nil {
-			continue
-		}
-		res = sheet.Add(row, res)
-	}
-	return res, nil
+	log.Println(res.IsEmpty())
+	return res, err
 }
 
 func (pg *pgConnection) AddRow(u user.User, r sheet.SheetRow, p process.Process) error {
