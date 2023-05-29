@@ -33,6 +33,10 @@ type Handler interface {
 
 	StartWork(w http.ResponseWriter, r *http.Request)
 	StopWork(w http.ResponseWriter, r *http.Request)
+
+	CreateReport(w http.ResponseWriter, r *http.Request)
+	FillReport(w http.ResponseWriter, r *http.Request)
+	ViewReport(w http.ResponseWriter, r *http.Request)
 }
 
 func New(h Handler) *http.Server {
@@ -68,6 +72,10 @@ func New(h Handler) *http.Server {
 
 		r.Post("/processes/{process}/sheet/row/start", h.StartWork)
 		r.Post("/processes/{process}/sheet/row/stop", h.StopWork)
+
+		r.Post("/report", h.CreateReport)
+		r.Post("/report/{report}/{process}/{sheet-row}", h.FillReport)
+		r.Get("/report/{report}", h.ViewReport)
 
 	})
 	return &http.Server{
