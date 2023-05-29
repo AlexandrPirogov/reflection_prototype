@@ -43,7 +43,7 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		log.Printf("setup err: %s", err)
 	}
-	log.Println("Setup testing database")
+	log.Println("Setting up testing database")
 	time.Sleep(time.Second * 10)
 	cmd := exec.Command("./../cmd/server/server")
 	err = cmd.Start()
@@ -56,8 +56,7 @@ func TestMain(m *testing.M) {
 	log.Printf("Server pid: %d", cmd.Process.Pid)
 	time.Sleep(time.Second * 3)
 	m.Run()
-	out, _ := cmd.Output()
-	log.Println(string(out))
+
 	shutdown := exec.Command("docker-compose", "down", "-v")
 	err = shutdown.Run()
 	if err != nil {
@@ -76,6 +75,9 @@ func TestRegister(t *testing.T) {
 
 	c := http.Client{}
 	resp, err := c.Do(req)
+	if err != nil {
+		log.Println(err)
+	}
 	require.Nil(t, err)
 	defer resp.Body.Close()
 	assert.Equal(t, 200, resp.StatusCode)
@@ -98,14 +100,8 @@ func TestLogin(t *testing.T) {
 
 func TestProcessCreate(t *testing.T) {
 	body, _ := json.Marshal(subProcess)
-	req, err := http.NewRequest(http.MethodPost, "http://localhost:8080/processes", bytes.NewBuffer(body))
-	jwt := cookie[0].Value
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+jwt)
-	require.Nil(t, err)
 
-	c := http.Client{}
-	resp, err := c.Do(req)
+	resp, err := Post("http://localhost:8080/processes", cookie[0].Value, bytes.NewBuffer(body))
 	require.Nil(t, err)
 
 	defer resp.Body.Close()
@@ -113,14 +109,7 @@ func TestProcessCreate(t *testing.T) {
 }
 
 func TestProcessList(t *testing.T) {
-	req, err := http.NewRequest(http.MethodPost, "http://localhost:8080/list/processes", nil)
-	jwt := cookie[0].Value
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+jwt)
-	require.Nil(t, err)
-
-	c := http.Client{}
-	resp, err := c.Do(req)
+	resp, err := Post("http://localhost:8080/list/processes", cookie[0].Value, nil)
 	require.Nil(t, err)
 
 	defer resp.Body.Close()
@@ -128,14 +117,8 @@ func TestProcessList(t *testing.T) {
 }
 
 func TestProcessByName(t *testing.T) {
-	req, err := http.NewRequest(http.MethodGet, "http://localhost:8080/processes/"+subProcess.Title, nil)
-	jwt := cookie[0].Value
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+jwt)
-	require.Nil(t, err)
-
-	c := http.Client{}
-	resp, err := c.Do(req)
+	url := "http://localhost:8080/processes/" + subProcess.Title
+	resp, err := Get(url, cookie[0].Value)
 	require.Nil(t, err)
 
 	defer resp.Body.Close()
@@ -144,14 +127,7 @@ func TestProcessByName(t *testing.T) {
 
 func TestThreadCreate(t *testing.T) {
 	body, _ := json.Marshal(subThread)
-	req, err := http.NewRequest(http.MethodPost, "http://localhost:8080/threads", bytes.NewBuffer(body))
-	jwt := cookie[0].Value
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+jwt)
-	require.Nil(t, err)
-
-	c := http.Client{}
-	resp, err := c.Do(req)
+	resp, err := Post("http://localhost:8080/threads", cookie[0].Value, bytes.NewBuffer(body))
 	require.Nil(t, err)
 
 	defer resp.Body.Close()
@@ -159,14 +135,7 @@ func TestThreadCreate(t *testing.T) {
 }
 
 func TestThreadList(t *testing.T) {
-	req, err := http.NewRequest(http.MethodPost, "http://localhost:8080/list/threads", nil)
-	jwt := cookie[0].Value
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+jwt)
-	require.Nil(t, err)
-
-	c := http.Client{}
-	resp, err := c.Do(req)
+	resp, err := Post("http://localhost:8080/list/threads", cookie[0].Value, nil)
 	require.Nil(t, err)
 
 	defer resp.Body.Close()
@@ -174,14 +143,8 @@ func TestThreadList(t *testing.T) {
 }
 
 func TestThreadByName(t *testing.T) {
-	req, err := http.NewRequest(http.MethodGet, "http://localhost:8080/processes/"+subThread.Process+"/"+subThread.Title, nil)
-	jwt := cookie[0].Value
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+jwt)
-	require.Nil(t, err)
-
-	c := http.Client{}
-	resp, err := c.Do(req)
+	url := "http://localhost:8080/processes/" + subThread.Process + "/" + subThread.Title
+	resp, err := Get(url, cookie[0].Value)
 	require.Nil(t, err)
 
 	defer resp.Body.Close()
@@ -189,14 +152,9 @@ func TestThreadByName(t *testing.T) {
 }
 
 func TestProcessesThreads(t *testing.T) {
-	req, err := http.NewRequest(http.MethodGet, "http://localhost:8080/process/"+subProcess.Title+"/threads", nil)
-	jwt := cookie[0].Value
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+jwt)
-	require.Nil(t, err)
+	url := "http://localhost:8080/process/" + subProcess.Title + "/threads"
 
-	c := http.Client{}
-	resp, err := c.Do(req)
+	resp, err := Get(url, cookie[0].Value)
 	require.Nil(t, err)
 
 	defer resp.Body.Close()
@@ -204,15 +162,9 @@ func TestProcessesThreads(t *testing.T) {
 }
 
 func TestSheetCreate(t *testing.T) {
+	url := "http://localhost:8080/processes/" + subSheet.Process + "/sheet"
 	body, _ := json.Marshal(subSheet)
-	req, err := http.NewRequest(http.MethodPost, "http://localhost:8080/processes/"+subSheet.Process+"/sheet", bytes.NewBuffer(body))
-	jwt := cookie[0].Value
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+jwt)
-	require.Nil(t, err)
-
-	c := http.Client{}
-	resp, err := c.Do(req)
+	resp, err := Post(url, cookie[0].Value, bytes.NewBuffer(body))
 	require.Nil(t, err)
 
 	defer resp.Body.Close()
@@ -220,15 +172,9 @@ func TestSheetCreate(t *testing.T) {
 }
 
 func TestSheetAddContent(t *testing.T) {
+	url := "http://localhost:8080/processes/" + subSheet.Process + "/sheet/row"
 	body, _ := json.Marshal(subSheetRow)
-	req, err := http.NewRequest(http.MethodPost, "http://localhost:8080/processes/"+subSheet.Process+"/sheet/row", bytes.NewBuffer(body))
-	jwt := cookie[0].Value
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+jwt)
-	require.Nil(t, err)
-
-	c := http.Client{}
-	resp, err := c.Do(req)
+	resp, err := Post(url, cookie[0].Value, bytes.NewBuffer(body))
 	require.Nil(t, err)
 
 	defer resp.Body.Close()
