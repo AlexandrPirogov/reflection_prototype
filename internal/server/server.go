@@ -74,7 +74,7 @@ func New(h Handler) *http.Server {
 		r.Post("/processes/{process}/sheet/row/stop", h.StopWork)
 
 		r.Post("/report", h.CreateReport)
-		r.Post("/report/{report}/{process}/{sheet-row}", h.FillReport)
+		r.Post("/report/{report}/{process}", h.FillReport)
 		r.Get("/report/{report}", h.ViewReport)
 
 	})
