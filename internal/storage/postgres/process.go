@@ -8,15 +8,24 @@ import (
 	"time"
 )
 
+const (
+	QueryStoreProcess = `insert into processes values(default, 
+		(select id from users where email = $1), $2, $3)`
+
+	QueryReadProcess = `select title from processes p
+	join users u on u.id = p.user_id and u.email = $1 and p.title = $2`
+
+	QueryListProcesses = `select title from processes p
+	join users u on u.id = p.user_id and u.email = $1`
+)
+
 // StoreProcess stores given process to db
 //
 // Pre-cond: given process to store. Process must be unique
 //
 // Post-cond: process was stored in db
 func (pg *pgConnection) StoreProcess(u user.User, p process.Process) error {
-	query := `insert into processes values(default, 
-		(select id from users where email = $1), $2, $3)`
-	_, err := pg.conn.Exec(context.Background(), query, u.Email, process.Title(p), time.Now())
+	_, err := pg.conn.Exec(context.Background(), QueryStoreProcess, u.Email, process.Title(p), time.Now())
 	if err != nil {
 		log.Println(err)
 		return err
@@ -35,9 +44,7 @@ func (pg *pgConnection) StoreProcess(u user.User, p process.Process) error {
 // Post-cond: returned  process that satisfied pattern
 func (pg *pgConnection) ReadProcess(u user.User, pattern process.Process) (process.Process, error) {
 	var res process.Process
-	query := `select title from processes p
-			join users u on u.id = p.user_id and u.email = $1 and p.title = $2`
-	err := pg.conn.QueryRow(context.Background(), query, u.Email, pattern.Title).Scan(&res.Title)
+	err := pg.conn.QueryRow(context.Background(), QueryReadProcess, u.Email, pattern.Title).Scan(&res.Title)
 	if err != nil {
 		log.Println(err)
 		return process.Process{}, err
@@ -53,9 +60,7 @@ func (pg *pgConnection) ReadProcess(u user.User, pattern process.Process) (proce
 // Post-cond: returned  list of processes
 func (pg *pgConnection) ListProcesses(u user.User) ([]process.Process, error) {
 	result := make([]process.Process, 0)
-	query := `select title from processes p
-				join users u on u.id = p.user_id and u.email = $1`
-	rows, err := pg.conn.Query(context.Background(), query, u.Email)
+	rows, err := pg.conn.Query(context.Background(), QueryListProcesses, u.Email)
 	if err != nil {
 		log.Println(err)
 		return nil, err
